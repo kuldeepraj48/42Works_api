@@ -31,9 +31,14 @@ RUN php artisan config:cache && \
 RUN mkdir -p storage/logs && \
     touch storage/logs/laravel.log
 
+# ---- CRITICAL FIX FOR RENDER ----
+# Make sure PHP-FPM (www-data) owns storage and cache
+RUN chown -R www-data:www-data storage bootstrap/cache
+
 # Fix storage and cache folder permissions
 RUN chmod -R 775 storage bootstrap/cache && \
     chmod 664 storage/logs/laravel.log
+# ---- END FIX ----
 
 # Copy nginx config
 COPY nginx.conf /etc/nginx/nginx.conf

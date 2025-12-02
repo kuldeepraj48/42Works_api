@@ -1,22 +1,25 @@
 FROM php:8.2-fpm
 
-# Install system dependencies
+# System packages
 RUN apt-get update && apt-get install -y \
-    git zip unzip libonig-dev libzip-dev libpng-dev \
-    && docker-php-ext-install pdo pdo_mysql zip mbstring
+    libpq-dev \
+    unzip \
+    git
 
-# Set working directory
-WORKDIR /var/www/html
+# Install PostgreSQL extension
+RUN docker-php-ext-install pdo pdo_pgsql
 
-# Copy Composer
+# Install composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-# Copy app
+WORKDIR /var/www/html
+
 COPY . .
 
-# Install Laravel dependencies
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
 
-EXPOSE 10000
+RUN php artisan config:clear
+RUN php artisan cache:clear
+RUN php artisan config:cache
 
-CMD php artisan serve --host=0.0.0.0 --port=10000
+CMD ["php-fpm"]

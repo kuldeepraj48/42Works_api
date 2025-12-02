@@ -49,5 +49,5 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # Expose port
 EXPOSE 80
 
-# Start Nginx + PHP-FPM together
-CMD ["/usr/bin/supervisord"]
+# Start Nginx + PHP-FPM *AFTER running migrations*
+CMD ["bash", "-lc", "php artisan migrate --force && /usr/bin/supervisord"]
